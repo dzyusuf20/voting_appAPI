@@ -1,27 +1,23 @@
 import datetime
 import os
-import dj_database_url # Tambahkan ini di atas
+import dj_database_url
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ## PERBAIKAN 1: Cara memanggil SECRET_KEY diperbaiki ##
+# os.environ.get() butuh dua argumen: nama variabel dan nilai default.
+# Nilai rahasianya harus menjadi nilai default, bukan nama variabel.
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-6&x*19$#y4*+m(*m6u-gthgn_x9t+h)k@^$g^4sul=i3sz+l6@')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get ('django-insecure-6&x*19$#y4*+m(*m6u-gthgn_x9t+h)k@^$g^4sul=i3sz+l6@')
-
-# Render akan secara otomatis set DEBUG=Fals
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-# Application definition
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,12 +32,14 @@ INSTALLED_APPS = [
 
     # local
     'api',
-
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', #tambahan
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # ## PERBAIKAN 2: Tambahkan Whitenoise Middleware di sini ##
+    # Ini penting agar Render bisa menyajikan file statis (CSS/JS admin) dengan benar.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,75 +67,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'voting_project.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': dj_database_url.config(
-        # Fallback ke database sqlite lokal jika tidak ada DATABASE_URL
         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
         conn_max_age=600
     )
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
+STATIC_URL = '/static/'
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-# ==> TAMBAHKAN ATAU PASTIKAN KODE INI ADA DI BAGIAN BAWAH settings.py ANDA <==
-
-# URL untuk mengakses file statis di browser
-STATIC_URL = 'static/'
-
-# Pengaturan ini HANYA akan aktif di server produksi (seperti di Render)
-# karena Render secara otomatis mengatur DEBUG = False
 if not DEBUG:
-    # Folder tempat 'collectstatic' akan mengumpulkan semua file statis
-    # Ini adalah baris yang memperbaiki error Anda.
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-    # Mesin penyimpanan untuk membuat file statis lebih efisien
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#TAMBAHAN ---------------------------------------------------------------
-# Izinkan semua origin (sementara untuk testing)
+# CATATAN: Untuk keamanan lebih, di masa depan ganti ini dengan CORS_ALLOWED_ORIGINS
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
@@ -145,15 +101,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10  # Ini akan menjadi limit per halaman
+    'PAGE_SIZE': 10
 }
 
 AUTH_USER_MODEL = "api.User"
 
-# OPTIONAL: atur umur token
 from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
-#-----------------------------------------------------------------------

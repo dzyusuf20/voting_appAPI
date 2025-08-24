@@ -1,15 +1,13 @@
-# urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
-# import langsung dari module views lokal (pastikan list_peserta_admin ada di .views)
 from .views import (
     register_admin, me, change_password,
     generate_peserta,
     KandidatViewSet,
     vote, hasil,
-    list_peserta_admin,   # <-- tambahkan ini
+    list_peserta_admin,
+    delete_peserta,
 )
 
 router = DefaultRouter()
@@ -35,6 +33,7 @@ urlpatterns = [
     # Kandidat CRUD (router)
     path('', include(router.urls)),
 
-    # Peserta list (khusus admin) — gunakan function view yang sudah ada
+    # Peserta list dan delete
     path('peserta/', list_peserta_admin, name='peserta-list'),
+    path('peserta/<int:id>/', delete_peserta, name='peserta-delete'),
 ]

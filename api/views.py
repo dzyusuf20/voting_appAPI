@@ -93,20 +93,6 @@ def generate_peserta(request):
 # views.py
 
 # -------- Peserta --------
-# views.py
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
-from django.utils.timezone import localtime
-from django.db.models import Exists, OuterRef
-
-# import model & permission Anda sesuai struktur project
-# from yourapp.models import User, Vote
-# from yourapp.permissions import IsAppAdmin
-
-# -------- Peserta --------
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsAppAdmin])
 def list_peserta_admin(request):
@@ -134,15 +120,11 @@ def list_peserta_admin(request):
     elif status_vote == 'false':
         peserta_qs = peserta_qs.filter(sudah_vote=False)
 
-    # Inisiasi paginator (akan memakai PAGE_SIZE dari settings.py jika tidak dioverride)
+    # Inisiasi paginator
     paginator = PageNumberPagination()
-    # Jika ingin override ukuran halaman secara lokal, buka komentar di bawah:
-    # paginator.page_size = 10
-
-    # Lakukan pagination pada queryset
     page_qs = paginator.paginate_queryset(peserta_qs, request)
 
-    # Bangun payload hasil untuk halaman ini
+    # Bangun payload hasil
     data = []
     for p in page_qs:
         data.append({
@@ -150,15 +132,32 @@ def list_peserta_admin(request):
             "username": p.username,
             "must_change_password": p.must_change_password,
             "date_joined": localtime(p.date_joined).strftime("%Y-%m-%d %H:%M:%S"),
-            "sudah_vote": bool(getattr(p, "sudah_vote", False)),  # gunakan anotasi
+            "sudah_vote": bool(getattr(p, "sudah_vote", False)),
         })
 
-    # Kembalikan response dalam format pagination DRF:
-    # {
-    #   "count": ..., "next": "...?page=2", "previous": null, "results": [ ... ]
-    # }
     return paginator.get_paginated_response(data)
 
+
+# -------- DELETE Peserta --------
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated, IsAppAdmin])
+def delete_peserta(request, id):
+    """
+    DELETE /api/peserta/<id>/
+    Hanya admin bisa hapus peserta yang dia miliki.
+    """
+    admin = request.user
+
+    try:
+        peserta = User.objects.get(id=id, is_participant=True)
+    except User.DoesNotExist:
+        return Response({"error": "Peserta tidak ditemukan."}, status=404)
+
+    if peserta.admin_owner_id != admin.id:
+        return Response({"error": "Forbidden: peserta bukan milik admin ini."}, status=403)
+
+    peserta.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 # -------- Kandidat --------
 class KandidatViewSet(viewsets.ModelViewSet):

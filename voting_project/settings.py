@@ -119,7 +119,7 @@ USE_TZ = True
 # ==> TAMBAHKAN ATAU PASTIKAN KODE INI ADA DI BAGIAN BAWAH settings.py ANDA <==
 
 # URL untuk mengakses file statis di browser
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 # Pengaturan ini HANYA akan aktif di server produksi (seperti di Render)
 # karena Render secara otomatis mengatur DEBUG = False

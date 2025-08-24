@@ -116,9 +116,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# ==> TAMBAHKAN ATAU PASTIKAN KODE INI ADA DI BAGIAN BAWAH settings.py ANDA <==
+
+# URL untuk mengakses file statis di browser
 STATIC_URL = '/static/'
+
+# Pengaturan ini HANYA akan aktif di server produksi (seperti di Render)
+# karena Render secara otomatis mengatur DEBUG = False
 if not DEBUG:
+    # Folder tempat 'collectstatic' akan mengumpulkan semua file statis
+    # Ini adalah baris yang memperbaiki error Anda.
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Mesin penyimpanan untuk membuat file statis lebih efisien
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type

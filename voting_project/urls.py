@@ -16,8 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from api.views import KandidatViewSet # Import ViewSet
+
+# Buat router
+router = DefaultRouter()
+router.register(r'kandidat', KandidatViewSet, basename='kandidat')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
+    path('api/', include('api.urls')), # Include URL dari app 'api'
+    path('api/', include(router.urls)), # Include URL dari router untuk KandidatViewSet
 ]

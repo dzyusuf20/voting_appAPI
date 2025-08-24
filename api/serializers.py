@@ -2,11 +2,16 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
+from django.utils.timezone import localtime
 from .models import Kandidat, Vote
 
 User = get_user_model()
 
-# -------- Auth / Users --------
+
+# ========================
+# Auth & User Serializers
+# ========================
+
 class RegisterAdminSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=150,
@@ -30,6 +35,12 @@ class GeneratePesertaSerializer(serializers.Serializer):
 
 class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True, validators=[validate_password])
+    
+    # Optional: validasi tambahan bisa ditambahkan di sini jika diperlukan
+    def validate(self, data):
+        # request.user bisa diakses dari context jika dikirim dari view
+        # user = self.context.get('request')
+        return data
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -38,20 +49,32 @@ class MeSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'is_app_admin', 'is_participant', 'must_change_password']
 
 
-# -------- Peserta --------
-class PesertaListSerializer(serializers.ModelSerializer):
+# ========================
+# Peserta Serializer
+# ========================
+
+# Ini adalah serializer yang digunakan oleh view `list_peserta_admin`
+class PesertaSerializer(serializers.ModelSerializer):
     sudah_vote = serializers.SerializerMethodField()
-    date_joined = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    date_joined = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'must_change_password', 'date_joined', 'sudah_vote']
 
     def get_sudah_vote(self, obj):
+        # Mengecek apakah ada record Vote yang berelasi dengan user ini
         return Vote.objects.filter(voter=obj).exists()
 
+    def get_date_joined(self, obj):
+        # Mengambil dan memformat waktu sesuai zona waktu lokal server
+        return localtime(obj.date_joined).strftime("%Y-%m-%d %H:%M:%S")
 
-# -------- Kandidat / Vote --------
+
+# ========================
+# Kandidat & Vote Serializers
+# ========================
+
 class KandidatCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kandidat
@@ -59,7 +82,7 @@ class KandidatCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class KandidatListSerializer(serializers.ModelSerializer):
-    total_votes = serializers.IntegerField(read_only=True)
+    total_votes = serializers.IntegerField(read_only=True, source='votes__count')
 
     class Meta:
         model = Kandidat

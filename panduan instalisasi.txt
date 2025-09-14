@@ -1,0 +1,62 @@
+====================================================
+  README - Aplikasi Voting (Backend Django)
+====================================================
+
+Ini adalah backend REST API untuk aplikasi voting sederhana yang dibangun menggunakan Django dan Django Rest Framework.
+
+---
+## prerequisites
+
+Sebelum memulai, pastikan Anda sudah menginstal:
+1.  **Python:** Versi 3.10 atau lebih baru.
+2.  **pip** (biasanya sudah terinstal bersama Python).
+3.  **venv** (untuk membuat virtual environment).
+
+---
+## 🚀 Tahapan Instalasi & Konfigurasi Lokal
+
+1.  **Clone Repositori:**
+    ```bash
+    git clone [URL_REPOSITORI_ANDA]
+    cd [NAMA_FOLDER_PROYEK_DJANGO]
+    ```
+
+2.  **Buat dan Aktifkan Virtual Environment:**
+    Ini akan mengisolasi package proyek Anda.
+
+    * **Di Windows:**
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+
+    * **Di macOS/Linux:**
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+
+3.  **Install Dependencies:**
+    Pastikan virtual environment sudah aktif, lalu jalankan:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Jalankan Migrasi Database:**
+    Perintah ini akan membuat file database SQLite (`db.sqlite3`) dan semua tabel yang dibutuhkan.
+    ```bash
+    python manage.py migrate
+    ```
+
+5.  **Buat Superuser (Opsional):**
+    Untuk mengakses halaman admin Django di `http://127.0.0.1:8000/admin/`.
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+---
+## 🏃‍♂️ Menjalankan Server Development
+
+Setelah semua instalasi selesai, jalankan server lokal dengan perintah:
+```bash
+python manage.py runserver

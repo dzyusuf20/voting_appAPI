@@ -1,0 +1,29 @@
+django projek voting
+
+dzyusuf
+yusufdeardo20@gmail.com
+ponsel20
+
+
+admin aplikasi via API ( POST /api/register-admin/ )
+{"username": "adminapp", "password": "admin12345"}
+
+
+rm db.sqlite3
+rd /s /q api\migrations
+python manage.py makemigrations api
+python manage.py migrate
+
+
+python manage.py check
+
+python manage.py sqlmigrate api 0001
+
+python manage.py createsuperuser
+
+sername: akunvot46593, password: jhk8k0r0 -> tes12345
+
+Scretkey : )sE/)ZbTnc:h:^U
+
+admin1
+tes123123
